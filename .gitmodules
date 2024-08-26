@@ -1,0 +1,3 @@
+[submodule "external/jnihook"]
+	path = external/jnihook
+	url = https://github.com/rdbo/jnihook
