@@ -23,21 +23,20 @@ void *thread_main(void *)
 {
 	JNIEnv *env;
 	JavaVM *jvm;
-	jnihook_t jnihook;
 
 	// freopen("/tmp/mchook.log", "w", stdout);
 
 	std::cout << "[MCH] Library loaded!" << std::endl;
 
 	if (JNI_GetCreatedJavaVMs(&jvm, 1, NULL) != JNI_OK) {
-		std::cout << "[DH] Failed to retrieve JavaVM pointer" << std::endl;
+		std::cout << "[MCH] Failed to retrieve JavaVM pointer" << std::endl;
 		return NULL;
 	}
 
 	std::cout << "[MCH] JavaVM: " << jvm << std::endl;
 
 	if (jvm->AttachCurrentThread((void **)&env, NULL) != JNI_OK) {
-		std::cout << "[DH] Failed to retrieve JNI environment" << std::endl;
+		std::cout << "[MCH] Failed to retrieve JNI environment" << std::endl;
 		return NULL;
 	}
 
@@ -55,15 +54,14 @@ void *thread_main(void *)
 	jmethodID tick_method = env->GetMethodID(Minecraft_class, "t", "()V");
 	std::cout << "[MCH] Minecraft::tick():" << tick_method << std::endl;
 
-	std::cout << "[MCH] JNIHook_Init result: " << JNIHook_Init(env, &jnihook) << std::endl;
+	std::cout << "[MCH] JNIHook_Init result: " << JNIHook_Init(jvm) << std::endl;
 
 	std::cout << "[MCH] JNIHook_Attach result: " <<
-		JNIHook_Attach(&jnihook, hurtTo_method, (void *)hk_hurtTo, NULL) << std::endl;
+		JNIHook_Attach(hurtTo_method, (void *)hk_hurtTo, NULL, NULL) << std::endl;
 
 	std::cout << "[MCH] JNIHook_Attach result: " <<
-		JNIHook_Attach(&jnihook, tick_method, (void *)hk_tick, &orig_Minecraft_class) << std::endl;
+		JNIHook_Attach(tick_method, (void *)hk_tick, &orig_Minecraft_tick, &orig_Minecraft_class) << std::endl;
 
-	orig_Minecraft_tick = env->GetMethodID(orig_Minecraft_class, "t", "()V");
 	std::cout << "[MCH] Original Minecraft::tick(): " << orig_Minecraft_tick << std::endl;
 
 	jvm->DetachCurrentThread();
